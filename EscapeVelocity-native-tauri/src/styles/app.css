@@ -197,3 +197,52 @@
 .ev-palette__cat { color: var(--ev-text-faint); font-size: var(--ev-fs-sm); }
 .ev-palette__title { flex: 1 1 auto; }
 .ev-palette__empty { padding: 18px; color: var(--ev-text-faint); text-align: center; }
+
+/* ---- Editor: LaTeX source textarea (M1; CodeMirror replaces this at M4) ---- */
+input, textarea { user-select: text; }
+.ev-latex-input {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  resize: none;
+  border: 0;
+  outline: none;
+  background: var(--ev-bg);
+  color: var(--ev-text);
+  font-family: var(--ev-font-mono);
+  font-size: var(--ev-fs-md);
+  line-height: 1.55;
+  padding: 14px 16px;
+  tab-size: 2;
+  white-space: pre;
+  overflow: auto;
+}
+
+.ev-pane__meta { color: var(--ev-text-faint); font-size: var(--ev-fs-xs); }
+
+/* ---- Preview (PDF.js) ---- */
+.ev-preview {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  background: var(--ev-bg);
+}
+.ev-preview__pages {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+}
+.ev-page {
+  background: #fff;                 /* paper is always white, regardless of theme */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35), 0 0 0 1px var(--ev-border);
+  border-radius: 1px;
+}
+
+/* ---- Status dot colors by compile state ---- */
+.ev-status-dot--ok { background: var(--ev-success); }
+.ev-status-dot--idle { background: var(--ev-text-faint); }
+.ev-status-dot--compiling { background: var(--ev-warn); }
+.ev-status-dot--error { background: var(--ev-error); }
+.ev-status-flag { color: var(--ev-warn); }

@@ -4,6 +4,7 @@ import { CommandPalette } from "./command-palette/CommandPalette";
 import { registerCommands } from "./commands/registry";
 import { installKeymap, type KeyBinding } from "./commands/keymap";
 import { workspace } from "./workspace/store";
+import { compileStore } from "./compile/store";
 import { applyTheme, getStoredTheme } from "./theme/tokens";
 
 /** Default actions exposed in the command palette and bound below. */
@@ -44,6 +45,13 @@ function registerDefaultCommands() {
       keybinding: "⌘⇧T",
       run: workspace.toggleTheme,
     },
+    {
+      id: "compile.run",
+      category: "LaTeX",
+      title: "Compile",
+      keybinding: "⌘↵",
+      run: () => void compileStore.compileNow(),
+    },
   ]);
 }
 
@@ -54,6 +62,7 @@ const KEYMAP: KeyBinding[] = [
   { key: "mod-2", command: "workspace.toggle_preview" },
   { key: "mod-shift-l", command: "editor.toggle_view" },
   { key: "mod-shift-t", command: "theme.toggle" },
+  { key: "mod-enter", command: "compile.run" },
 ];
 
 let commandsRegistered = false;
@@ -65,7 +74,10 @@ function App() {
       registerDefaultCommands();
       commandsRegistered = true;
     }
-    return installKeymap(KEYMAP);
+    const uninstall = installKeymap(KEYMAP);
+    // Compile the sample document on launch so the preview isn't empty.
+    void compileStore.compileNow();
+    return uninstall;
   }, []);
 
   return (

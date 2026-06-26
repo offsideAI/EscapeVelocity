@@ -1,0 +1,12 @@
+# Local build configuration.
+#
+# Tectonic's *-sys crates locate ICU / freetype / harfbuzz / etc. via pkg-config.
+# On macOS, Homebrew's pkgconfig dir and the keg-only icu4c are NOT on
+# pkg-config's default search path, so we add them here.
+#
+# `force = false` means this does NOT override a PKG_CONFIG_PATH you set
+# yourself, and on Linux/Windows the (absent) macOS dirs are simply ignored —
+# pkg-config still finds system libs via its default path. Cross-platform CI
+# should set its own dep paths.
+[env]
+PKG_CONFIG_PATH = { value = "/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/icu4c@78/lib/pkgconfig", force = false }
