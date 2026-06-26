@@ -1,0 +1,135 @@
+/* EscapeVelocity — design tokens.
+   Dark-first, calm, keyboard-first. Zed-inspired but independently authored
+   (clean-room) — see THIRD_PARTY.md. Values are CSS custom properties so the
+   whole UI re-themes by flipping `data-theme` on <html>. */
+
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Surfaces (deepest -> raised) */
+  --ev-bg:            #16181d;  /* app background, editor canvas */
+  --ev-surface:       #1b1e24;  /* side panes */
+  --ev-surface-2:     #21252c;  /* title bar, status bar, headers */
+  --ev-raised:        #262b33;  /* command palette, popovers */
+  --ev-overlay-scrim: rgba(0, 0, 0, 0.50);
+
+  /* Borders */
+  --ev-border:        #2a2f38;
+  --ev-border-subtle: #22262d;
+
+  /* Text */
+  --ev-text:          #c7ccd6;
+  --ev-text-muted:    #888f9c;
+  --ev-text-faint:    #5b626d;
+
+  /* Accent (calm blue) */
+  --ev-accent:        #7aa2f7;
+  --ev-accent-hover:  #93b4ff;
+  --ev-accent-soft:   rgba(122, 162, 247, 0.15);
+  --ev-on-accent:     #0c0d10;
+
+  /* Interaction states */
+  --ev-hover:         rgba(255, 255, 255, 0.045);
+  --ev-active:        rgba(255, 255, 255, 0.075);
+  --ev-selection:     rgba(122, 162, 247, 0.22);
+  --ev-focus-ring:    rgba(122, 162, 247, 0.55);
+
+  /* Status */
+  --ev-error:         #e0707a;
+  --ev-warn:          #e0b074;
+  --ev-success:       #8ec07c;
+  --ev-info:          #7aa2f7;
+
+  /* Syntax — used by the LaTeX source pane from M4 onward */
+  --ev-syn-keyword:   #c899e0;
+  --ev-syn-string:    #8ec07c;
+  --ev-syn-comment:   #5b626d;
+  --ev-syn-function:  #74ade8;
+  --ev-syn-number:    #d8a36a;
+  --ev-syn-operator:  #9aa3b2;
+  --ev-syn-command:   #74ade8;  /* \command */
+
+  /* Typography */
+  --ev-font-ui:   ui-sans-serif, -apple-system, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+  --ev-font-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+  --ev-fs-xs: 11px;
+  --ev-fs-sm: 12px;
+  --ev-fs-md: 13px;
+  --ev-fs-lg: 15px;
+  --ev-fs-xl: 18px;
+
+  /* Geometry */
+  --ev-radius-sm: 4px;
+  --ev-radius-md: 6px;
+  --ev-radius-lg: 10px;
+  --ev-titlebar-h: 38px;
+  --ev-statusbar-h: 24px;
+
+  --ev-shadow-overlay: 0 16px 48px rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --ev-bg:            #f6f7f9;
+  --ev-surface:       #ffffff;
+  --ev-surface-2:     #eef0f3;
+  --ev-raised:        #ffffff;
+  --ev-overlay-scrim: rgba(20, 22, 28, 0.28);
+  --ev-border:        #d9dde3;
+  --ev-border-subtle: #e7eaee;
+  --ev-text:          #1f2430;
+  --ev-text-muted:    #5a6371;
+  --ev-text-faint:    #8a93a2;
+  --ev-accent:        #3b6fe0;
+  --ev-accent-hover:  #2f60cc;
+  --ev-accent-soft:   rgba(59, 111, 224, 0.12);
+  --ev-on-accent:     #ffffff;
+  --ev-hover:         rgba(20, 22, 28, 0.045);
+  --ev-active:        rgba(20, 22, 28, 0.075);
+  --ev-selection:     rgba(59, 111, 224, 0.16);
+  --ev-focus-ring:    rgba(59, 111, 224, 0.5);
+  --ev-error:         #c5404a;
+  --ev-warn:          #b07a1e;
+  --ev-success:       #3f8f4f;
+  --ev-info:          #3b6fe0;
+  --ev-syn-keyword:   #8b39c0;
+  --ev-syn-string:    #3f8f4f;
+  --ev-syn-comment:   #8a93a2;
+  --ev-syn-function:  #2f60cc;
+  --ev-syn-number:    #b06a1e;
+  --ev-syn-operator:  #5a6371;
+  --ev-syn-command:   #2f60cc;
+  --ev-shadow-overlay: 0 16px 48px rgba(20, 22, 28, 0.18), 0 2px 8px rgba(20, 22, 28, 0.12);
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--ev-bg);
+  color: var(--ev-text);
+  font-family: var(--ev-font-ui);
+  font-size: var(--ev-fs-md);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow: hidden;          /* the app owns its own scroll regions */
+  user-select: none;
+}
+
+::selection { background: var(--ev-selection); }
+
+/* Calm, thin scrollbars */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb {
+  background: var(--ev-border);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--ev-text-faint); }
+::-webkit-scrollbar-track { background: transparent; }
