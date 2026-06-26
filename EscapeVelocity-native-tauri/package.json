@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "prewarm": "TECTONIC_CACHE_DIR=\"$PWD/src-tauri/vendor/tectonic-cache\" cargo run --manifest-path src-tauri/Cargo.toml --example prewarm_cache"
   },
   "dependencies": {
     "@tauri-apps/api": "^2",
