@@ -5,6 +5,7 @@
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import type { ReactNode } from "react";
 import { useWorkspace } from "./store";
+import { useCompile } from "../compile/store";
 import { StructurePane } from "../panes/structure/StructurePane";
 import { EditorPane } from "../panes/editor/EditorPane";
 import { PreviewPane } from "../panes/preview/PreviewPane";
@@ -25,16 +26,39 @@ function TitleBar() {
 
 function StatusBar() {
   const view = useWorkspace((s) => s.editorView);
+  const status = useCompile((s) => s.status);
+  const pageCount = useCompile((s) => s.pageCount);
+  const error = useCompile((s) => s.error);
+
+  const statusText =
+    status === "compiling"
+      ? "Compiling…"
+      : status === "ok"
+        ? "Ready"
+        : status === "error"
+          ? "Compile error"
+          : "Idle";
+  const oddPages = pageCount != null && pageCount % 2 === 1;
+
   return (
     <div className="ev-statusbar">
-      <span className="ev-status-item">
-        <span className="ev-status-dot" />
-        Ready
+      <span className="ev-status-item" title={error ?? undefined}>
+        <span className={`ev-status-dot ev-status-dot--${status}`} />
+        {statusText}
       </span>
-      <span className="ev-status-item">— pages</span>
+      <span className="ev-status-item">
+        {pageCount != null ? `${pageCount} page${pageCount === 1 ? "" : "s"}` : "— pages"}
+        {oddPages && (
+          <span
+            className="ev-status-flag"
+            title="KDP needs an even page count; export will add a blank verso"
+          >
+            &nbsp;· odd
+          </span>
+        )}
+      </span>
       <span className="ev-statusbar__spacer" />
       <span className="ev-status-item">{view === "latex" ? "LaTeX" : "Structured"}</span>
-      <span className="ev-status-item">0 warnings</span>
     </div>
   );
 }
