@@ -20,11 +20,28 @@ fn app_version() -> String {
     format!("EscapeVelocity {}", env!("CARGO_PKG_VERSION"))
 }
 
+/// Point Tectonic at a writable, pre-warmed cache (seeded from the bundled
+/// `tectonic-cache` resource) so compiles are fully offline. Idempotent.
+fn prepare_tectonic_cache(app: &tauri::AppHandle) {
+    use tauri::Manager;
+    // Accept either bundling layout (mapped to `tectonic-cache`, or copied under
+    // `vendor/tectonic-cache`); use whichever actually holds the cache.
+    let resource_cache = app.path().resource_dir().ok().and_then(|d| {
+        [d.join("tectonic-cache"), d.join("vendor/tectonic-cache")]
+            .into_iter()
+            .find(|p| p.join("bundles").is_dir())
+    });
+    if let Ok(base) = app.path().app_cache_dir() {
+        compile::ensure_offline_cache(resource_cache, base.join("tectonic-cache"));
+    }
+}
+
 /// Compile LaTeX source to a PDF, returned as raw bytes (an `ArrayBuffer` on the
 /// JS side). Runs on a blocking thread so the UI never stalls. On failure the
 /// error string carries Tectonic's message.
 #[tauri::command]
-async fn compile_latex(source: String) -> Result<tauri::ipc::Response, String> {
+async fn compile_latex(app: tauri::AppHandle, source: String) -> Result<tauri::ipc::Response, String> {
+    prepare_tectonic_cache(&app);
     let result = tauri::async_runtime::spawn_blocking(move || compile::latex_to_pdf(&source))
         .await
         .map_err(|e| format!("compile task panicked: {e}"))?;

@@ -55,9 +55,10 @@ Locked decisions (from the interview): Stack A (Tauri 2 + React + Vite + TS); li
 
 ### Story 1.1 — Embed Tectonic
 - ✅ Add the pinned `tectonic` crate (`=0.16.9`) to `src-tauri`
-- ✅ Resolve macOS build deps (brew: harfbuzz/graphite2/freetype/libpng/fontconfig + keg-only icu4c; `src-tauri/.cargo/config.toml` sets `PKG_CONFIG_PATH`)
-- ⏸️ Pre-bundle the TeX support files for fully-offline first compile (currently fetched once from the network, then cached — offline packaging deferred)
-- ✅ Rust smoke test (`tests/compile_smoke.rs`): minimal `memoir` → valid PDF
+- ✅ Resolve macOS build deps (brew: harfbuzz/graphite2/freetype/libpng/fontconfig + keg-only icu4c; `.cargo/config.toml` sets `PKG_CONFIG_PATH`)
+- ✅ **Fully offline compilation**: cache-only mode (`only_cached`) over a pre-warmed cache. `npm run prewarm` (`examples/prewarm_cache.rs`) builds `vendor/tectonic-cache` (covers the generator's sizes/packages); it's bundled as a Tauri resource and seeded into a writable per-user cache on first launch. **Verified**: a distinct doc compiles with the network blocked (dead proxy) and **zero files fetched**. (gitignored/regenerated; raw-LaTeX needing un-prewarmed packages is the known exception.)
+- ✅ Rust smoke test (`tests/compile_smoke.rs`): representative `memoir` → valid PDF, offline
+- 🟡 Verify the bundled-resource path in a packaged `tauri build` (engine offline proven; packaged-app seeding pending a release build)
 
 ### Story 1.2 — Compile module (Rust `compile/`)
 - ✅ `compile::latex_to_pdf(source) -> PDF bytes` via the embedded engine
