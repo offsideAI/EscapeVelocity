@@ -94,6 +94,13 @@ export const compileStore = {
     set({ pageCount: n });
   },
 
+  /** Replace the document (from the structured editor) and schedule a rebuild. */
+  setDocument(doc: Document): void {
+    set({ document: doc, docJson: JSON.stringify(doc, null, 2), docError: null });
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => void compileStore.build(), DEBOUNCE_MS);
+  },
+
   /** Generate LaTeX from the current document + settings, then compile it. */
   async build(): Promise<void> {
     if (debounceTimer) {
@@ -129,4 +136,9 @@ export function useCompile<T>(selector: (s: AppState) => T): T {
     () => selector(state),
     () => selector(state),
   );
+}
+
+// Dev-only inspection hook for the console / automation (stripped in builds).
+if (import.meta.env.DEV && typeof window !== "undefined") {
+  (window as unknown as { __evStore?: typeof compileStore }).__evStore = compileStore;
 }

@@ -53,6 +53,7 @@
   /* Typography */
   --ev-font-ui:   ui-sans-serif, -apple-system, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
   --ev-font-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+  --ev-font-prose: "Iowan Old Style", "Palatino Linotype", Palatino, "Georgia", ui-serif, serif;
   --ev-fs-xs: 11px;
   --ev-fs-sm: 12px;
   --ev-fs-md: 13px;
