@@ -12,7 +12,7 @@ App lives in [`EscapeVelocity-native-tauri/`](./EscapeVelocity-native-tauri/).
 | [Epic 0](#epic-0--m0-project-shell--reuse-foundation) | M0 | Project shell & reuse foundation | 🟢 |
 | [Epic 1](#epic-1--m1-compile-loop-tectonic--pdfjs) | M1 | Compile loop (Tectonic → PDF.js) · *checkpoint* | 🟢 |
 | [Epic 2](#epic-2--m2-generation-contract-latexgen) | M2 | Generation contract (`latexgen`) | 🟢 |
-| [Epic 3](#epic-3--m3-structured-editor) | M3 | Structured editor | ⬜ |
+| [Epic 3](#epic-3--m3-structured-editor) | M3 | Structured editor | 🟢 |
 | [Epic 4](#epic-4--m4-latex-source-pane--synctex) | M4 | LaTeX source pane + SyncTeX | ⬜ |
 | [Epic 5](#epic-5--m5-pagesetting-inspector) | M5 | PageSetting inspector | ⬜ |
 | [Epic 6](#epic-6--m6-export--kdp-preflight) | M6 | Export + KDP preflight · *checkpoint* | ⬜ |
@@ -108,24 +108,25 @@ Locked decisions (from the interview): Stack A (Tauri 2 + React + Vite + TS); li
 ---
 
 ## Epic 3 — M3: Structured editor
-**DoD:** a user types a chapter visually and sees it typeset; never touches code. **Status: ⬜**
+**DoD:** a user types a chapter visually and sees it typeset; never touches code. **Status: 🟢** (DoD met + verified on-device.)
 
 ### Story 3.1 — TipTap schema ↔ model
-- ⬜ Custom ProseMirror/TipTap schema = the semantic nodes/marks
-- ⬜ Serialize TipTap doc ↔ `document.json` (lossless round-trip)
+- ✅ Custom TipTap schema (`src/editor/schema.ts`): flat semantic blocks (`inline*`) — chapterTitle, heading(2/3), paragraph, blockQuote, pullQuote, verse, rawLatex, sceneBreak; marks bold↔strong, italic↔emphasis, smallCaps; footnote inline atom
+- ✅ Two-way serializer (`serialize.ts`): chapter titles group following blocks; **verified lossless** (footnote + front/back matter survive a round-trip; programmatic + slash-menu edits re-serialize correctly)
 
 ### Story 3.2 — Style palette & input
-- ⬜ Core style palette (Body, Chapter Title, H2/H3, Block Quote, Verse, Figure+caption, Footnote, Scene Break, Pull Quote, Raw-LaTeX) via shortcuts + slash menu
-- ⬜ Figure insert (image + caption, 300-DPI guidance)
-- ⬜ Semantic-only (no font/size/spacing pickers)
+- ✅ Style application via keyboard shortcuts (on each node) **and** a slash menu (`SlashMenu.tsx`, filter + ↑/↓/↵)
+- ✅ Semantic-only (no font/size/spacing pickers) — appearance owned by settings
+- ⏸️ Figure insert (needs asset handling) → later; footnote/link interactive editing → later (footnote round-trips; link renders as text)
 
 ### Story 3.3 — Edit → compile pipeline
-- ⬜ Edits update `document.json` → `latexgen` → debounced/cancellable recompile
-- ⬜ Structure/outline pane reflects the tree + drag-to-reorder
-- ⏸️ Spell-check, word/page count (deferred within M3 or to M7)
+- ✅ Edits → serialize → `setDocument` → `latexgen` → debounced recompile (supersede-by-runId)
+- ✅ Outline pane reflects chapters/headings (read-only)
+- ⏸️ Drag-to-reorder; spell-check; word/page count → later
 
 ### Story 3.4 — Verify M3
-- ⬜ Visual chapter authoring → live typeset preview; gate; on-device
+- ✅ Browser: editor renders sample, round-trip lossless, slash menu applies + serializes
+- 🟢 On-device: visual editing + live typeset preview together (full loop), no code touched
 
 ---
 

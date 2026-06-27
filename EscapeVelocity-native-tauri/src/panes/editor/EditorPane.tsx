@@ -1,16 +1,14 @@
 /** Center dock — the editor.
- *  M2: **Structured** view edits `document.json` directly (an interim JSON view;
- *  the visual block editor replaces it in M3); **LaTeX** view shows the
- *  read-only generated source (it becomes CodeMirror with editable Raw-LaTeX
- *  blocks in M4). Either way the document is the source of truth — the LaTeX is
- *  generated, never hand-authored. */
+ *  M3: **Structured** view is the visual block editor (TipTap); the author writes
+ *  in semantic blocks and never sees code. **LaTeX** view shows the generated
+ *  source read-only (it becomes CodeMirror with editable Raw-LaTeX blocks in M4).
+ *  The document is the source of truth; LaTeX is generated. */
 import { useWorkspace, workspace } from "../../workspace/store";
-import { compileStore, useCompile } from "../../compile/store";
+import { useCompile } from "../../compile/store";
+import { StructuredEditor } from "../../editor/StructuredEditor";
 
 export function EditorPane() {
   const view = useWorkspace((s) => s.editorView);
-  const docJson = useCompile((s) => s.docJson);
-  const docError = useCompile((s) => s.docError);
   const tex = useCompile((s) => s.tex);
   const status = useCompile((s) => s.status);
 
@@ -19,26 +17,8 @@ export function EditorPane() {
       <header className="ev-pane__header">
         <span className="ev-pane__title">Editor</span>
         <span className="ev-pane__header-spacer" />
-        {view === "structured" && (
-          <>
-            <span className="ev-pane__meta">
-              {docError ? (
-                <span style={{ color: "var(--ev-error)" }}>invalid JSON</span>
-              ) : (
-                "document.json · visual editor in M3"
-              )}
-            </span>
-            <button
-              type="button"
-              className="ev-iconbtn"
-              title="Rebuild (⌘↵)"
-              disabled={status === "compiling"}
-              onClick={() => void compileStore.build()}
-            >
-              {status === "compiling" ? "Building…" : "Rebuild"}
-            </button>
-          </>
-        )}
+        {status === "compiling" && <span className="ev-pane__meta">typesetting…</span>}
+        {view === "structured" && <span className="ev-pane__meta">type “/” for styles</span>}
         <div className="ev-seg" role="tablist" aria-label="Editor view">
           <button
             type="button"
@@ -62,12 +42,7 @@ export function EditorPane() {
       </header>
 
       {view === "structured" ? (
-        <textarea
-          className="ev-latex-input"
-          spellCheck={false}
-          value={docJson}
-          onChange={(e) => compileStore.setDocJson(e.target.value)}
-        />
+        <StructuredEditor />
       ) : (
         <textarea
           className="ev-latex-input"
