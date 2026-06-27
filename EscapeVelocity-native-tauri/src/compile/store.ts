@@ -33,11 +33,31 @@ export interface AppState {
 const DEBOUNCE_MS = 600;
 const NOT_TAURI = "Run the desktop app (`npm run tauri dev`) to generate and preview.";
 
+/** Mirror of Rust `default_settings("kdp_6x9")`. Used as the initial value so
+ *  the inspector renders immediately; Rust overwrites it (identically) on init. */
+const DEFAULT_SETTINGS: Settings = {
+  output_preset: "kdp_6x9",
+  trim: { width_in: 6, height_in: 9 },
+  bleed: false,
+  margins: { inside_in: 0.875, outside_in: 0.625, top_in: 0.9, bottom_in: 0.9 },
+  body: {
+    font: "ebgaramond",
+    size_pt: 11,
+    leading_pt: 14.5,
+    justify: true,
+    hyphenate: true,
+    microtype: true,
+  },
+  paragraph: { style: "indent", suppress_first_indent: true, widow_orphan_penalty: 10000 },
+  chapter: { kind: "plain", recto_start: true, drop_folio: true },
+  running_heads: { enabled: true },
+};
+
 let state: AppState = {
   docJson: JSON.stringify(sampleDocument, null, 2),
   document: sampleDocument as Document,
   docError: null,
-  settings: null,
+  settings: DEFAULT_SETTINGS,
   tex: "",
   status: "idle",
   error: null,
@@ -115,6 +135,24 @@ export const compileStore = {
     set({ document: doc, docJson: JSON.stringify(doc, null, 2), docError: null });
     if (debounceTimer) clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => void compileStore.build(), DEBOUNCE_MS);
+  },
+
+  /** Replace the PageSetting settings (from the inspector) and rebuild. */
+  setSettings(settings: Settings): void {
+    set({ settings });
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => void compileStore.build(), DEBOUNCE_MS);
+  },
+
+  /** Switch the output preset: load its default settings from Rust, then rebuild. */
+  async switchPreset(preset: string): Promise<void> {
+    if (!isTauri()) return;
+    try {
+      const settings = await getDefaultSettings(preset);
+      compileStore.setSettings(settings);
+    } catch (e) {
+      set({ status: "error", error: String(e) });
+    }
   },
 
   /** Generate LaTeX from the current document + settings, then compile it. */

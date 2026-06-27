@@ -52,6 +52,13 @@ function registerDefaultCommands() {
       keybinding: "⌘↵",
       run: () => void compileStore.build(),
     },
+    {
+      id: "inspector.open",
+      category: "View",
+      title: "Open PageSetting Inspector",
+      keybinding: "⌘,",
+      run: workspace.openInspector,
+    },
   ]);
 }
 
@@ -63,6 +70,7 @@ const KEYMAP: KeyBinding[] = [
   { key: "mod-shift-l", command: "editor.toggle_view" },
   { key: "mod-shift-t", command: "theme.toggle" },
   { key: "mod-enter", command: "compile.run" },
+  { key: "mod-,", command: "inspector.open" },
 ];
 
 let commandsRegistered = false;

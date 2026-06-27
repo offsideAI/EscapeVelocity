@@ -42,6 +42,20 @@ fn write_preamble(tex: &mut String, s: &Settings) {
     let openside = if s.chapter.recto_start { "openright" } else { "openany" };
     let _ = writeln!(tex, "\\documentclass[{size}pt,twoside,{openside}]{{memoir}}\n");
 
+    // Body font (fontspec, referenced by OTF file — see presets::FONTS). Loaded
+    // before microtype so protrusion applies to the chosen font. `None` = the
+    // memoir/XeTeX default (Computer Modern).
+    let font = presets::font(&s.body.font);
+    if let Some(spec) = font.and_then(|f| f.spec.as_ref()) {
+        let _ = writeln!(tex, "\\usepackage{{fontspec}}");
+        let _ = writeln!(
+            tex,
+            "\\setmainfont[BoldFont={},ItalicFont={},BoldItalicFont={}]{{{}}}",
+            spec.bold, spec.italic, spec.bold_italic, spec.main
+        );
+        let _ = writeln!(tex);
+    }
+
     // Packages
     let _ = writeln!(tex, "\\usepackage{{graphicx}}");
     if s.body.microtype {
@@ -107,7 +121,8 @@ fn write_preamble(tex: &mut String, s: &Settings) {
     let _ = writeln!(tex, "\\checkandfixthelayout\n");
 
     // Body type
-    let _ = writeln!(tex, "% --- Body type ({}, {}pt) ---", s.body.font, n(s.body.size_pt));
+    let font_label = font.map_or(s.body.font.as_str(), |f| f.label);
+    let _ = writeln!(tex, "% --- Body type ({}, {}pt) ---", font_label, n(s.body.size_pt));
     let linespread = s.body.leading_pt / (1.2 * s.body.size_pt);
     let _ = writeln!(tex, "\\linespread{{{}}}", n(linespread));
     if !s.body.hyphenate {

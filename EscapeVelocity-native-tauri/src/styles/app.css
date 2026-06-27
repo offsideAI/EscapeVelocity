@@ -379,3 +379,58 @@ input, textarea { user-select: text; }
 .ev-status-dot--compiling { background: var(--ev-warn); }
 .ev-status-dot--error { background: var(--ev-error); }
 .ev-status-flag { color: var(--ev-warn); }
+
+/* ---- Left dock tabs ---- */
+.ev-pane__header--tabs { gap: 2px; padding: 0 6px; }
+.ev-tab {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--ev-text-faint);
+  font: inherit;
+  font-size: var(--ev-fs-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  font-weight: 600;
+  padding: 0 8px;
+  height: 100%;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+.ev-tab:hover { color: var(--ev-text-muted); }
+.ev-tab--active { color: var(--ev-text); border-bottom-color: var(--ev-accent); }
+
+/* ---- Inspector ---- */
+.ev-inspector { padding: 8px 10px 24px; }
+.ev-insp__section { margin-bottom: 14px; }
+.ev-insp__title {
+  margin: 6px 0;
+  font-size: var(--ev-fs-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--ev-text-faint);
+  font-weight: 600;
+}
+.ev-insp__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: var(--ev-fs-sm);
+  color: var(--ev-text-muted);
+}
+.ev-insp__readout { color: var(--ev-text); }
+.ev-insp__select,
+.ev-insp__number {
+  background: var(--ev-bg);
+  color: var(--ev-text);
+  border: 1px solid var(--ev-border);
+  border-radius: var(--ev-radius-sm);
+  font: inherit;
+  font-size: var(--ev-fs-sm);
+  padding: 3px 6px;
+}
+.ev-insp__number { width: 78px; text-align: right; }
+.ev-insp__select { width: 60%; }
+.ev-insp__toggle { width: 15px; height: 15px; accent-color: var(--ev-accent); cursor: pointer; }
