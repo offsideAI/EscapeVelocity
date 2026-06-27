@@ -17,6 +17,20 @@ export async function generateLatex(document: Document, settings: Settings): Pro
   return await invoke<string>("generate_latex", { document, settings });
 }
 
+/** SyncTeX: preview click (page, vertical fraction) → generated-source line. */
+export async function synctexInverse(page: number, yFrac: number): Promise<number | null> {
+  if (!isTauri()) return null;
+  return await invoke<number | null>("synctex_inverse", { page, yFrac });
+}
+
+/** SyncTeX: source line → preview location (page + vertical fraction). */
+export async function synctexForward(
+  line: number,
+): Promise<{ page: number; y_frac: number } | null> {
+  if (!isTauri()) return null;
+  return await invoke<{ page: number; y_frac: number } | null>("synctex_forward", { line });
+}
+
 /** Compile a complete LaTeX document to PDF bytes via the embedded Tectonic
  *  engine. The Rust side returns raw bytes, delivered here as an ArrayBuffer. */
 export async function compileLatex(source: string): Promise<Uint8Array> {

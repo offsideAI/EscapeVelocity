@@ -14,6 +14,11 @@ pub mod import;
 pub mod latexgen;
 pub mod project;
 
+use std::sync::Mutex;
+
+/// Parsed SyncTeX for the most recent compile, used by the jump commands.
+static SYNCTEX: Mutex<Option<compile::synctex::SyncTex>> = Mutex::new(None);
+
 /// App name + version, for the About box / status bar.
 #[tauri::command]
 fn app_version() -> String {
@@ -42,11 +47,34 @@ fn prepare_tectonic_cache(app: &tauri::AppHandle) {
 #[tauri::command]
 async fn compile_latex(app: tauri::AppHandle, source: String) -> Result<tauri::ipc::Response, String> {
     prepare_tectonic_cache(&app);
-    let result = tauri::async_runtime::spawn_blocking(move || compile::latex_to_pdf(&source))
+    let out = tauri::async_runtime::spawn_blocking(move || compile::compile_offline(&source))
         .await
-        .map_err(|e| format!("compile task panicked: {e}"))?;
-    let bytes = result?;
-    Ok(tauri::ipc::Response::new(bytes))
+        .map_err(|e| format!("compile task panicked: {e}"))??;
+    // Cache the parsed SyncTeX for click-to-jump (best-effort).
+    let parsed = out.synctex.as_deref().and_then(compile::synctex::SyncTex::parse);
+    if let Ok(mut guard) = SYNCTEX.lock() {
+        *guard = parsed;
+    }
+    Ok(tauri::ipc::Response::new(out.pdf))
+}
+
+/// PDF preview click (page + vertical fraction 0..1) → generated-source line.
+#[tauri::command]
+fn synctex_inverse(page: u32, y_frac: f64) -> Option<u32> {
+    SYNCTEX.lock().ok()?.as_ref()?.inverse(page, y_frac)
+}
+
+#[derive(serde::Serialize)]
+struct ForwardHit {
+    page: u32,
+    y_frac: f64,
+}
+
+/// Source line → preview location (page + vertical fraction 0..1).
+#[tauri::command]
+fn synctex_forward(line: u32) -> Option<ForwardHit> {
+    let (page, y_frac) = SYNCTEX.lock().ok()?.as_ref()?.forward(line)?;
+    Some(ForwardHit { page, y_frac })
 }
 
 /// Default PageSetting for a named output preset (e.g. "kdp_6x9").
@@ -72,7 +100,9 @@ pub fn run() {
             app_version,
             compile_latex,
             default_settings,
-            generate_latex
+            generate_latex,
+            synctex_inverse,
+            synctex_forward
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

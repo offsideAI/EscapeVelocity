@@ -6,10 +6,10 @@
 import { useWorkspace, workspace } from "../../workspace/store";
 import { useCompile } from "../../compile/store";
 import { StructuredEditor } from "../../editor/StructuredEditor";
+import { LatexPane } from "../../editor/LatexPane";
 
 export function EditorPane() {
   const view = useWorkspace((s) => s.editorView);
-  const tex = useCompile((s) => s.tex);
   const status = useCompile((s) => s.status);
 
   return (
@@ -41,16 +41,7 @@ export function EditorPane() {
         </div>
       </header>
 
-      {view === "structured" ? (
-        <StructuredEditor />
-      ) : (
-        <textarea
-          className="ev-latex-input"
-          spellCheck={false}
-          readOnly
-          value={tex || "% Generated LaTeX appears here once the document compiles."}
-        />
-      )}
+      {view === "structured" ? <StructuredEditor /> : <LatexPane />}
     </div>
   );
 }
