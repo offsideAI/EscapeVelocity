@@ -25,6 +25,9 @@ export interface AppState {
   pdf: Uint8Array | null;
   pageCount: number | null;
   ranAt: number | null;
+  /** One-shot SyncTeX jump signals; `key` retriggers identical targets. */
+  jumpSource: { line: number; key: number } | null;
+  jumpPreview: { page: number; yFrac: number; key: number } | null;
 }
 
 const DEBOUNCE_MS = 600;
@@ -41,8 +44,11 @@ let state: AppState = {
   pdf: null,
   pageCount: null,
   ranAt: null,
+  jumpSource: null,
+  jumpPreview: null,
 };
 
+let signalKey = 0;
 const listeners = new Set<() => void>();
 function set(patch: Partial<AppState>): void {
   state = { ...state, ...patch };
@@ -94,6 +100,16 @@ export const compileStore = {
     set({ pageCount: n });
   },
 
+  /** Ask the LaTeX source pane to scroll to a generated-source line. */
+  requestSourceJump(line: number): void {
+    set({ jumpSource: { line, key: ++signalKey } });
+  },
+
+  /** Ask the preview to scroll to a page + vertical fraction. */
+  requestPreviewJump(page: number, yFrac: number): void {
+    set({ jumpPreview: { page, yFrac, key: ++signalKey } });
+  },
+
   /** Replace the document (from the structured editor) and schedule a rebuild. */
   setDocument(doc: Document): void {
     set({ document: doc, docJson: JSON.stringify(doc, null, 2), docError: null });
@@ -138,7 +154,12 @@ export function useCompile<T>(selector: (s: AppState) => T): T {
   );
 }
 
-// Dev-only inspection hook for the console / automation (stripped in builds).
+// Dev-only inspection hooks for the console / automation (stripped in builds).
 if (import.meta.env.DEV && typeof window !== "undefined") {
-  (window as unknown as { __evStore?: typeof compileStore }).__evStore = compileStore;
+  const w = window as unknown as {
+    __evStore?: typeof compileStore;
+    __evSetTex?: (t: string) => void;
+  };
+  w.__evStore = compileStore;
+  w.__evSetTex = (t: string) => set({ tex: t });
 }

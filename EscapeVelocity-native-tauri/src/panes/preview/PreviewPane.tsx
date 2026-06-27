@@ -1,10 +1,12 @@
-/** Right dock — page-true PDF preview (M1).
- *  Renders the compiled PDF with PDF.js, one canvas per page, scaled to fit the
- *  pane width (true trim aspect ratio preserved). SyncTeX click-to-jump is M4. */
+/** Right dock — page-true PDF preview (M1) with SyncTeX click-to-jump (M4).
+ *  Renders the compiled PDF with PDF.js. Clicking a page jumps the LaTeX source
+ *  pane to the matching line; a source click scrolls here (via the jump signal). */
 import { useEffect, useRef } from "react";
 import * as pdfjs from "pdfjs-dist";
 import workerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { compileStore, useCompile } from "../../compile/store";
+import { synctexInverse } from "../../compile/api";
+import { workspace } from "../../workspace/store";
 
 pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
 
@@ -13,6 +15,8 @@ export function PreviewPane() {
   const status = useCompile((s) => s.status);
   const error = useCompile((s) => s.error);
   const pageCount = useCompile((s) => s.pageCount);
+  const jump = useCompile((s) => s.jumpPreview);
+  const jumpKey = jump?.key;
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const pagesRef = useRef<HTMLDivElement>(null);
@@ -22,7 +26,6 @@ export function PreviewPane() {
     let cancelled = false;
 
     (async () => {
-      // Copy: PDF.js takes ownership of the buffer and may detach it.
       const doc = await pdfjs.getDocument({ data: pdf.slice() }).promise;
       if (cancelled) return;
       compileStore.setPageCount(doc.numPages);
@@ -44,6 +47,7 @@ export function PreviewPane() {
 
         const canvas = document.createElement("canvas");
         canvas.className = "ev-page";
+        canvas.dataset.page = String(i);
         canvas.width = Math.ceil(viewport.width);
         canvas.height = Math.ceil(viewport.height);
         canvas.style.width = `${viewport.width / dpr}px`;
@@ -64,6 +68,39 @@ export function PreviewPane() {
     };
   }, [pdf]);
 
+  // Source → preview: scroll to the page + vertical fraction, with a brief flash.
+  useEffect(() => {
+    const scroller = scrollRef.current;
+    const pages = pagesRef.current;
+    if (!scroller || !pages || !jump) return;
+    const canvas = pages.children[jump.page - 1] as HTMLElement | undefined;
+    if (!canvas) return;
+    const cRect = canvas.getBoundingClientRect();
+    const sRect = scroller.getBoundingClientRect();
+    const targetY =
+      scroller.scrollTop + (cRect.top - sRect.top) + jump.yFrac * cRect.height - scroller.clientHeight / 2;
+    scroller.scrollTo({ top: Math.max(0, targetY), behavior: "smooth" });
+    canvas.classList.add("ev-page--flash");
+    const id = setTimeout(() => canvas.classList.remove("ev-page--flash"), 700);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jumpKey]);
+
+  // Preview → source: click a page → jump the LaTeX pane to the matching line.
+  const onClick = async (e: React.MouseEvent) => {
+    const canvas = (e.target as HTMLElement).closest(".ev-page") as HTMLCanvasElement | null;
+    if (!canvas) return;
+    const page = Number(canvas.dataset.page);
+    if (!page) return;
+    const rect = canvas.getBoundingClientRect();
+    const yFrac = (e.clientY - rect.top) / rect.height;
+    const line = await synctexInverse(page, yFrac);
+    if (line != null) {
+      workspace.setEditorView("latex");
+      compileStore.requestSourceJump(line);
+    }
+  };
+
   const showOverlay = !pdf || status === "error";
 
   return (
@@ -74,7 +111,7 @@ export function PreviewPane() {
         {pageCount != null && pdf && <span className="ev-pane__meta">{pageCount} pp</span>}
       </header>
       <div className="ev-preview" ref={scrollRef}>
-        <div className="ev-preview__pages" ref={pagesRef} hidden={showOverlay} />
+        <div className="ev-preview__pages" ref={pagesRef} hidden={showOverlay} onClick={onClick} />
         {showOverlay && (
           <div className="ev-empty">
             {status === "error" ? (
@@ -90,8 +127,8 @@ export function PreviewPane() {
               <>
                 <div className="ev-empty__title">Page-true preview</div>
                 <div className="ev-empty__hint">
-                  Compiled by Tectonic, rendered at the real trim size. Edit the LaTeX
-                  view and recompile to see it update.
+                  Compiled by Tectonic, rendered at the real trim size. Click a page to jump to
+                  its source.
                 </div>
               </>
             )}

@@ -7,6 +7,8 @@
 //! (M4), a build directory + cancellable/debounced recompiles, and plain-language
 //! diagnostics from the TeX log (M6).
 
+pub mod synctex;
+
 use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
 
@@ -21,24 +23,34 @@ use tectonic::status::NoopStatusBackend;
 /// (seeded from the bundled, pre-warmed cache by [`ensure_offline_cache`]). A
 /// document needing a package outside the pre-warmed set will error rather than
 /// silently fetch — keep the prewarm in sync with what `latexgen` emits.
+/// A compiled document: the PDF, plus the raw SyncTeX data (if produced) used
+/// for click-to-jump between the preview and the source pane.
+pub struct CompileOutput {
+    pub pdf: Vec<u8>,
+    pub synctex: Option<Vec<u8>>,
+}
+
 pub fn latex_to_pdf(source: &str) -> Result<Vec<u8>, String> {
-    compile_with(source, true)
+    Ok(compile_with(source, true)?.pdf)
 }
 
 /// Online variant: lets the engine fetch missing files from the network. Used
 /// **only by the cache prewarm tool** to populate the bundled cache — never by
 /// the app at runtime.
 pub fn latex_to_pdf_fetching(source: &str) -> Result<Vec<u8>, String> {
-    compile_with(source, false)
+    Ok(compile_with(source, false)?.pdf)
 }
 
-fn compile_with(source: &str, only_cached: bool) -> Result<Vec<u8>, String> {
+/// Compile offline (cache-only), returning the PDF and SyncTeX data.
+pub fn compile_offline(source: &str) -> Result<CompileOutput, String> {
+    compile_with(source, true)
+}
+
+fn compile_with(source: &str, only_cached: bool) -> Result<CompileOutput, String> {
     let mut status = NoopStatusBackend::default();
 
     let config = PersistentConfig::open(false).map_err(stringify_err)?;
-    let bundle = config
-        .default_bundle(only_cached)
-        .map_err(stringify_err)?;
+    let bundle = config.default_bundle(only_cached).map_err(stringify_err)?;
     let format_cache_path = config.format_cache_path().map_err(stringify_err)?;
 
     let mut files = {
@@ -49,6 +61,7 @@ fn compile_with(source: &str, only_cached: bool) -> Result<Vec<u8>, String> {
             .format_name("latex")
             .keep_logs(false)
             .keep_intermediates(false)
+            .synctex(true)
             .format_cache_path(format_cache_path)
             .output_format(OutputFormat::Pdf)
             .do_not_write_output_files();
@@ -57,10 +70,16 @@ fn compile_with(source: &str, only_cached: bool) -> Result<Vec<u8>, String> {
         sess.into_file_data()
     };
 
-    match files.remove("texput.pdf") {
-        Some(file) => Ok(file.data),
-        None => Err("Tectonic produced no PDF output".to_string()),
-    }
+    let pdf = files
+        .remove("texput.pdf")
+        .map(|f| f.data)
+        .ok_or("Tectonic produced no PDF output")?;
+    let synctex = files
+        .remove("texput.synctex.gz")
+        .or_else(|| files.remove("texput.synctex"))
+        .map(|f| f.data);
+
+    Ok(CompileOutput { pdf, synctex })
 }
 
 /// Flatten Tectonic's error chain into a readable message.

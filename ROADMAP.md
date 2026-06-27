@@ -13,7 +13,7 @@ App lives in [`EscapeVelocity-native-tauri/`](./EscapeVelocity-native-tauri/).
 | [Epic 1](#epic-1--m1-compile-loop-tectonic--pdfjs) | M1 | Compile loop (Tectonic → PDF.js) · *checkpoint* | 🟢 |
 | [Epic 2](#epic-2--m2-generation-contract-latexgen) | M2 | Generation contract (`latexgen`) | 🟢 |
 | [Epic 3](#epic-3--m3-structured-editor) | M3 | Structured editor | 🟢 |
-| [Epic 4](#epic-4--m4-latex-source-pane--synctex) | M4 | LaTeX source pane + SyncTeX | ⬜ |
+| [Epic 4](#epic-4--m4-latex-source-pane--synctex) | M4 | LaTeX source pane + SyncTeX | 🟢 |
 | [Epic 5](#epic-5--m5-pagesetting-inspector) | M5 | PageSetting inspector | ⬜ |
 | [Epic 6](#epic-6--m6-export--kdp-preflight) | M6 | Export + KDP preflight · *checkpoint* | ⬜ |
 | [Epic 7](#epic-7--m7-import--templates) | M7 | Import + templates (Phase 2 start) | ⬜ |
@@ -131,20 +131,22 @@ Locked decisions (from the interview): Stack A (Tauri 2 + React + Vite + TS); li
 ---
 
 ## Epic 4 — M4: LaTeX source pane + SyncTeX
-**DoD:** click a preview page → editor jumps; raw block edits survive a round-trip. **Status: ⬜**
+**DoD:** click a preview page → editor jumps; raw block edits survive a round-trip. **Status: 🟢** (DoD met + verified.)
 
 ### Story 4.1 — CodeMirror 6 pane
-- ⬜ CM6 + LaTeX (Lezer/tree-sitter) highlighting + Zed dark theme
-- ⬜ Read-only decorations on generated regions; editable on `raw_latex` regions
+- ✅ CM6 + `stex` LaTeX highlighting + Zed theme (`src/editor/LatexPane.tsx`), read-only
+- ✅ Source is generated → the pane is read-only by design; raw-LaTeX is edited in the structured editor (round-trips losslessly). Editable raw regions *in the source pane* → later (needs the node source map)
 
 ### Story 4.2 — SyncTeX both directions
-- ⬜ Parse SyncTeX (PDF ↔ `.tex`)
-- ⬜ Compose with the `latexgen` source map: page click → node/editor; caret → preview scroll
+- ✅ Enable SyncTeX in Tectonic; capture + gunzip; parse (`src-tauri/src/compile/synctex.rs`, fraction-based) — Rust unit test
+- ✅ Preview click → source line (`synctex_inverse`); source click → preview page (`synctex_forward`); jump signals wired through the store
+- ⏸️ Compose with the node-id source map (jumps land on the `.tex` line; line→node mapping later)
 
 ### Story 4.3 — Lossless Raw-LaTeX
-- ⬜ Capture raw-block edits back into `document.json` verbatim; round-trip test
+- ✅ `raw_latex` round-trips verbatim via the structured editor (verified in M3)
 
 ### Story 4.4 — Verify M4
+- ✅ Browser: LaTeX pane renders generated source with highlighting; `requestSourceJump` scrolls/highlights the target line; Rust SyncTeX unit test; native regression (compile + preview intact)
 
 ---
 

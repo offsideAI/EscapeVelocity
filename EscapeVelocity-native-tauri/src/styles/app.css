@@ -238,7 +238,21 @@ input, textarea { user-select: text; }
   background: #fff;                 /* paper is always white, regardless of theme */
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35), 0 0 0 1px var(--ev-border);
   border-radius: 1px;
+  cursor: pointer;
 }
+.ev-page--flash {
+  box-shadow: 0 0 0 3px var(--ev-accent), 0 2px 12px rgba(0, 0, 0, 0.4);
+  transition: box-shadow 120ms ease;
+}
+
+/* ---- LaTeX source pane (CodeMirror) ---- */
+.ev-latexpane {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+.ev-latexpane .cm-editor { height: 100%; }
 
 /* ---- Structured editor (TipTap) ---- */
 .ev-editor {
