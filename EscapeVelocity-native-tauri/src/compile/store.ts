@@ -200,4 +200,6 @@ if (import.meta.env.DEV && typeof window !== "undefined") {
   };
   w.__evStore = compileStore;
   w.__evSetTex = (t: string) => set({ tex: t });
+  (w as { __evSetPdf?: (b: number[]) => void }).__evSetPdf = (b: number[]) =>
+    set({ pdf: new Uint8Array(b), status: "ok", error: null });
 }

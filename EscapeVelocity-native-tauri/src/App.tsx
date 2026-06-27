@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Workspace } from "./workspace/Workspace";
 import { CommandPalette } from "./command-palette/CommandPalette";
+import { ExportDialog } from "./export/ExportDialog";
 import { registerCommands } from "./commands/registry";
 import { installKeymap, type KeyBinding } from "./commands/keymap";
 import { workspace } from "./workspace/store";
@@ -59,6 +60,13 @@ function registerDefaultCommands() {
       keybinding: "⌘,",
       run: workspace.openInspector,
     },
+    {
+      id: "export.open",
+      category: "File",
+      title: "Export… (KDP preflight)",
+      keybinding: "⌘E",
+      run: workspace.openExport,
+    },
   ]);
 }
 
@@ -71,6 +79,7 @@ const KEYMAP: KeyBinding[] = [
   { key: "mod-shift-t", command: "theme.toggle" },
   { key: "mod-enter", command: "compile.run" },
   { key: "mod-,", command: "inspector.open" },
+  { key: "mod-e", command: "export.open" },
 ];
 
 let commandsRegistered = false;
@@ -92,6 +101,7 @@ function App() {
     <>
       <Workspace />
       <CommandPalette />
+      <ExportDialog />
     </>
   );
 }

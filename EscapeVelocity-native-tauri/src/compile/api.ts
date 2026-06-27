@@ -1,6 +1,18 @@
-/** Bridge to the Rust compile / generation commands. */
+/** Bridge to the Rust compile / generation / export commands. */
 import { invoke } from "@tauri-apps/api/core";
+import { save } from "@tauri-apps/plugin-dialog";
 import type { Document, Settings } from "../model/types";
+
+export interface PreflightCheck {
+  label: string;
+  status: "pass" | "warn" | "fail";
+  detail: string;
+  fix: string | null;
+}
+export interface PreflightReport {
+  page_count: number;
+  checks: PreflightCheck[];
+}
 
 /** True when running inside the Tauri shell (vs. a plain browser dev server). */
 export function isTauri(): boolean {
@@ -29,6 +41,34 @@ export async function synctexForward(
 ): Promise<{ page: number; y_frac: number } | null> {
   if (!isTauri()) return null;
   return await invoke<{ page: number; y_frac: number } | null>("synctex_forward", { line });
+}
+
+/** Run the KDP preflight checks. */
+export async function runPreflight(document: Document, settings: Settings): Promise<PreflightReport> {
+  return await invoke<PreflightReport>("preflight", { document, settings });
+}
+
+/** Export a print-ready PDF (even page count) to `path`. */
+export async function exportPdf(
+  document: Document,
+  settings: Settings,
+  path: string,
+): Promise<{ page_count: number; blank_added: boolean }> {
+  return await invoke("export_pdf", { document, settings, path });
+}
+
+/** Export the generated LaTeX source to `path`. */
+export async function exportTex(document: Document, settings: Settings, path: string): Promise<void> {
+  await invoke("export_tex", { document, settings, path });
+}
+
+/** Native save dialog → chosen path (or null if cancelled). */
+export async function chooseSavePath(
+  defaultName: string,
+  ext: string,
+  label: string,
+): Promise<string | null> {
+  return await save({ defaultPath: defaultName, filters: [{ name: label, extensions: [ext] }] });
 }
 
 /** Compile a complete LaTeX document to PDF bytes via the embedded Tectonic

@@ -4,7 +4,7 @@
  *  workspace store. */
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import type { ReactNode } from "react";
-import { useWorkspace } from "./store";
+import { useWorkspace, workspace } from "./store";
 import { useCompile } from "../compile/store";
 import { LeftDock } from "./LeftDock";
 import { EditorPane } from "../panes/editor/EditorPane";
@@ -17,6 +17,9 @@ function TitleBar() {
         EscapeVelocity
       </span>
       <span className="ev-titlebar__spacer" data-tauri-drag-region />
+      <button type="button" className="ev-titlebar__btn" onClick={() => workspace.openExport()}>
+        Export
+      </button>
       <span className="ev-titlebar__hint">
         <span className="ev-kbd">⌘⇧P</span> commands
       </span>
