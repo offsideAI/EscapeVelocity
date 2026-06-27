@@ -8,4 +8,7 @@
 
 # Pre-warmed Tectonic cache (large, generated). Bundled into the app at build
 # time as a resource; regenerate with `npm run prewarm` before `tauri build`.
-/vendor/tectonic-cache/
+# Keep the directory (with .gitkeep) so tauri-build's resource path always
+# exists; ignore only the generated contents.
+/vendor/tectonic-cache/*
+!/vendor/tectonic-cache/.gitkeep

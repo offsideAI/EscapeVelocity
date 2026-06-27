@@ -11,7 +11,7 @@ App lives in [`EscapeVelocity-native-tauri/`](./EscapeVelocity-native-tauri/).
 |---|---|---|---|
 | [Epic 0](#epic-0--m0-project-shell--reuse-foundation) | M0 | Project shell & reuse foundation | 🟢 |
 | [Epic 1](#epic-1--m1-compile-loop-tectonic--pdfjs) | M1 | Compile loop (Tectonic → PDF.js) · *checkpoint* | 🟢 |
-| [Epic 2](#epic-2--m2-generation-contract-latexgen) | M2 | Generation contract (`latexgen`) | ⬜ |
+| [Epic 2](#epic-2--m2-generation-contract-latexgen) | M2 | Generation contract (`latexgen`) | 🟢 |
 | [Epic 3](#epic-3--m3-structured-editor) | M3 | Structured editor | ⬜ |
 | [Epic 4](#epic-4--m4-latex-source-pane--synctex) | M4 | LaTeX source pane + SyncTeX | ⬜ |
 | [Epic 5](#epic-5--m5-pagesetting-inspector) | M5 | PageSetting inspector | ⬜ |
@@ -83,26 +83,27 @@ Locked decisions (from the interview): Stack A (Tauri 2 + React + Vite + TS); li
 ---
 
 ## Epic 2 — M2: Generation contract (`latexgen`)
-**DoD:** editing a sample `document.json` changes the compiled preview; golden tests pass. **Status: ⬜**
+**DoD:** editing a sample `document.json` changes the compiled preview; golden tests pass. **Status: 🟢** (DoD met + verified on-device.)
 
 ### Story 2.1 — Data model
-- ⬜ `document.json` node tree types (containers `front_matter`/`body`/`back_matter`, `part`/`chapter`/`section`; blocks `paragraph`/`heading`/`block_quote`/`verse`/`figure`/`footnote`/`scene_break`/`pull_quote`/`raw_latex`; marks `emphasis`/`strong`/`small_caps`/`link`)
-- ⬜ `settings.json` PageSetting model (trim, margins/gutter, body, paragraph, chapter_style, running_heads, front_back, output_preset)
-- ⬜ Rust ↔ shared TS type parity (serde; codegen or hand-kept)
+- ✅ `document.json` node tree (`latexgen/model.rs`): containers `front_matter`/`body`/`back_matter`, `part`/`chapter`/`section`; blocks `paragraph`/`heading`/`block_quote`/`verse`/`figure`/`scene_break`/`pull_quote`/`raw_latex`; inline `text`/`emphasis`/`strong`/`small_caps`/`link`/`footnote` (footnotes modeled inline)
+- ✅ `settings.json` PageSetting model (trim, margins, body, paragraph, chapter, running_heads, output_preset)
+- ✅ Shared TS mirror (`src/model/types.ts`, hand-kept; Rust authoritative)
 
 ### Story 2.2 — Pure `latexgen` function
-- ⬜ Preamble from `settings.json` (`\documentclass{memoir}`, `\setstocksize`/`\settrimmedsize`/`\settrims` incl. bleed, `fontspec`, `\linespread`, `microtype` protrusion, margins/gutter, widow/orphan penalties, chapter style, page styles)
-- ⬜ Body from `document.json` (chapter/section, quote/quotation, verse, figure+caption, scene-break ornament, footnote, `raw_latex` verbatim)
-- ⬜ Readable, commented output (`% --- Chapter N ---`)
-- ⬜ Emit node-id ↔ `.tex` line-range **source map**
+- ✅ Preamble from `settings.json` (`\documentclass{memoir}`, `\setstocksize`/`\settrimmedsize`(+`\settrims` for bleed), `\linespread`, `microtype` protrusion, margins, widow/orphan penalties, chapter style, page styles)
+- ✅ Body from `document.json` (chapter/section, quotation, verse, figure+caption, scene-break ornament, inline footnote, `raw_latex` verbatim) with LaTeX escaping
+- ✅ Readable, commented output (`% --- Chapter: … ---`)
+- ⏸️ `fontspec` + bundled fonts → M5 (PageSetting font selector); drop-cap/ornament chapter styles → M5
+- ⏸️ node-id ↔ `.tex` source map → M4 (with SyncTeX, its consumer)
 
 ### Story 2.3 — Presets data file
-- ⬜ One data-driven presets module (`kdp_6x9`, `kdp_5x8`, … : trim, bleed, margins, gutter-by-page-count)
+- ✅ One data-driven presets module (`latexgen/presets.rs`): KDP 6×9/5×8/5.5×8.5/8.5×11 + KDP gutter-by-page-count table
 
 ### Story 2.4 — Tests & integration
-- ⬜ Golden-file tests (`insta`): fixed `document.json` + `settings.json` → expected `.tex`
-- ⬜ Replace the hardcoded `.tex` in the compile loop with generated output
-- ⬜ Verify + gate
+- ✅ Golden test (BLESS pattern, dep-free) `tests/latexgen_golden.rs`; determinism test; **`generated_sample_compiles`** end-to-end (generated LaTeX compiles offline to PDF)
+- ✅ Frontend wired to generate-from-document (`generate_latex`/`default_settings` commands); Structured view edits `document.json`, LaTeX view shows generated source read-only
+- 🟢 Verified on-device: sample document generates + compiles + renders in the native window
 
 ---
 
