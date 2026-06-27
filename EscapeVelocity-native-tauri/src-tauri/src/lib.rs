@@ -92,17 +92,61 @@ fn generate_latex(
     latexgen::generate(&document, &settings)
 }
 
+/// Run the KDP preflight checks for a document + settings.
+#[tauri::command]
+async fn preflight(
+    app: tauri::AppHandle,
+    document: latexgen::model::Document,
+    settings: latexgen::model::Settings,
+) -> Result<export::PreflightReport, String> {
+    prepare_tectonic_cache(&app);
+    tauri::async_runtime::spawn_blocking(move || export::preflight(&document, &settings))
+        .await
+        .map_err(|e| format!("preflight task panicked: {e}"))?
+}
+
+/// Export a print-ready PDF (even page count guaranteed) to `path`.
+#[tauri::command]
+async fn export_pdf(
+    app: tauri::AppHandle,
+    document: latexgen::model::Document,
+    settings: latexgen::model::Settings,
+    path: String,
+) -> Result<export::ExportInfo, String> {
+    prepare_tectonic_cache(&app);
+    let out = tauri::async_runtime::spawn_blocking(move || export::export(&document, &settings))
+        .await
+        .map_err(|e| format!("export task panicked: {e}"))??;
+    std::fs::write(&path, &out.pdf).map_err(|e| format!("failed to write {path}: {e}"))?;
+    Ok(out.info)
+}
+
+/// Export the generated LaTeX source to `path` (portable, no lock-in).
+#[tauri::command]
+fn export_tex(
+    document: latexgen::model::Document,
+    settings: latexgen::model::Settings,
+    path: String,
+) -> Result<(), String> {
+    let tex = latexgen::generate(&document, &settings);
+    std::fs::write(&path, tex).map_err(|e| format!("failed to write {path}: {e}"))
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![
             app_version,
             compile_latex,
             default_settings,
             generate_latex,
             synctex_inverse,
-            synctex_forward
+            synctex_forward,
+            preflight,
+            export_pdf,
+            export_tex
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
