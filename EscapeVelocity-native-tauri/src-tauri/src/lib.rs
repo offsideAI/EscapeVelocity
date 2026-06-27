@@ -49,11 +49,31 @@ async fn compile_latex(app: tauri::AppHandle, source: String) -> Result<tauri::i
     Ok(tauri::ipc::Response::new(bytes))
 }
 
+/// Default PageSetting for a named output preset (e.g. "kdp_6x9").
+#[tauri::command]
+fn default_settings(preset: String) -> Result<latexgen::model::Settings, String> {
+    latexgen::presets::default_settings(&preset).ok_or_else(|| format!("unknown preset: {preset}"))
+}
+
+/// Generate clean `memoir` LaTeX from a document + settings. Pure; no compile.
+#[tauri::command]
+fn generate_latex(
+    document: latexgen::model::Document,
+    settings: latexgen::model::Settings,
+) -> String {
+    latexgen::generate(&document, &settings)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![app_version, compile_latex])
+        .invoke_handler(tauri::generate_handler![
+            app_version,
+            compile_latex,
+            default_settings,
+            generate_latex
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

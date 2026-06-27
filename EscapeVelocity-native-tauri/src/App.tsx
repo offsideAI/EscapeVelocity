@@ -48,9 +48,9 @@ function registerDefaultCommands() {
     {
       id: "compile.run",
       category: "LaTeX",
-      title: "Compile",
+      title: "Rebuild",
       keybinding: "⌘↵",
-      run: () => void compileStore.compileNow(),
+      run: () => void compileStore.build(),
     },
   ]);
 }
@@ -75,8 +75,8 @@ function App() {
       commandsRegistered = true;
     }
     const uninstall = installKeymap(KEYMAP);
-    // Compile the sample document on launch so the preview isn't empty.
-    void compileStore.compileNow();
+    // Load default settings + the sample document and build on launch.
+    void compileStore.init();
     return uninstall;
   }, []);
 

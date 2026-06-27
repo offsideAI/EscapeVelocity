@@ -1,0 +1,83 @@
+{
+  "front_matter": [
+    {
+      "type": "chapter",
+      "title": [{ "type": "text", "value": "Preface" }],
+      "children": [
+        {
+          "type": "paragraph",
+          "content": [
+            { "type": "text", "value": "This short sample exercises every kind of block the generator understands." }
+          ]
+        }
+      ]
+    }
+  ],
+  "body": [
+    {
+      "type": "chapter",
+      "title": [{ "type": "text", "value": "The Lighthouse" }],
+      "children": [
+        {
+          "type": "paragraph",
+          "content": [
+            { "type": "text", "value": "It was the kind of morning that arrives only at the edge of the world, with " },
+            { "type": "emphasis", "content": [{ "type": "text", "value": "fog" }] },
+            { "type": "text", "value": " and a " },
+            { "type": "strong", "content": [{ "type": "text", "value": "pewter" }] },
+            { "type": "text", "value": " sea, tended by the keeper of the " },
+            { "type": "small_caps", "content": [{ "type": "text", "value": "Eddystone" }] },
+            { "type": "text", "value": " light" },
+            { "type": "footnote", "content": [{ "type": "text", "value": "A note anchored inline, as footnotes are." }] },
+            { "type": "text", "value": "." }
+          ]
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "content": [{ "type": "text", "value": "A Letter Arrives" }]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            { "type": "text", "value": "Even prose with awkward characters typesets cleanly: 50% off, A & B, #1, and a_b." }
+          ]
+        },
+        {
+          "type": "block_quote",
+          "content": [
+            { "type": "text", "value": "What a person does with news that arrives too late to be useful and too early to be ignored." }
+          ]
+        },
+        { "type": "scene_break" },
+        {
+          "type": "verse",
+          "lines": [
+            [{ "type": "text", "value": "The fog made up its mind at last" }],
+            [{ "type": "text", "value": "and, very slowly, began to lift." }]
+          ]
+        },
+        {
+          "type": "pull_quote",
+          "content": [{ "type": "text", "value": "She had counted those steps for eleven years." }]
+        },
+        {
+          "type": "raw_latex",
+          "code": "\\begin{center}\\textsc{end of the sample}\\end{center}"
+        }
+      ]
+    }
+  ],
+  "back_matter": [
+    {
+      "type": "chapter",
+      "title": [{ "type": "text", "value": "About the Author" }],
+      "children": [
+        {
+          "type": "paragraph",
+          "content": [{ "type": "text", "value": "Written for the EscapeVelocity generation contract." }]
+        }
+      ]
+    }
+  ]
+}

@@ -1,13 +1,17 @@
-/** Center dock — the editor. M1 wires the **LaTeX** view to an editable source
- *  buffer that drives the compile→preview loop; the **Structured** view remains
- *  a placeholder until M3. The LaTeX view becomes a read-mostly CodeMirror pane
- *  (with editable Raw-LaTeX regions) in M4. */
+/** Center dock — the editor.
+ *  M2: **Structured** view edits `document.json` directly (an interim JSON view;
+ *  the visual block editor replaces it in M3); **LaTeX** view shows the
+ *  read-only generated source (it becomes CodeMirror with editable Raw-LaTeX
+ *  blocks in M4). Either way the document is the source of truth — the LaTeX is
+ *  generated, never hand-authored. */
 import { useWorkspace, workspace } from "../../workspace/store";
 import { compileStore, useCompile } from "../../compile/store";
 
 export function EditorPane() {
   const view = useWorkspace((s) => s.editorView);
-  const source = useCompile((s) => s.source);
+  const docJson = useCompile((s) => s.docJson);
+  const docError = useCompile((s) => s.docError);
+  const tex = useCompile((s) => s.tex);
   const status = useCompile((s) => s.status);
 
   return (
@@ -15,16 +19,25 @@ export function EditorPane() {
       <header className="ev-pane__header">
         <span className="ev-pane__title">Editor</span>
         <span className="ev-pane__header-spacer" />
-        {view === "latex" && (
-          <button
-            type="button"
-            className="ev-iconbtn"
-            title="Compile (⌘↵)"
-            disabled={status === "compiling"}
-            onClick={() => void compileStore.compileNow()}
-          >
-            {status === "compiling" ? "Compiling…" : "Compile"}
-          </button>
+        {view === "structured" && (
+          <>
+            <span className="ev-pane__meta">
+              {docError ? (
+                <span style={{ color: "var(--ev-error)" }}>invalid JSON</span>
+              ) : (
+                "document.json · visual editor in M3"
+              )}
+            </span>
+            <button
+              type="button"
+              className="ev-iconbtn"
+              title="Rebuild (⌘↵)"
+              disabled={status === "compiling"}
+              onClick={() => void compileStore.build()}
+            >
+              {status === "compiling" ? "Building…" : "Rebuild"}
+            </button>
+          </>
         )}
         <div className="ev-seg" role="tablist" aria-label="Editor view">
           <button
@@ -48,23 +61,20 @@ export function EditorPane() {
         </div>
       </header>
 
-      {view === "latex" ? (
+      {view === "structured" ? (
         <textarea
           className="ev-latex-input"
           spellCheck={false}
-          value={source}
-          onChange={(e) => compileStore.setSource(e.target.value)}
+          value={docJson}
+          onChange={(e) => compileStore.setDocJson(e.target.value)}
         />
       ) : (
-        <div className="ev-pane__body">
-          <div className="ev-empty">
-            <div className="ev-empty__title">Structured editor</div>
-            <div className="ev-empty__hint">
-              Write in semantic blocks — Body, Chapter Title, Block Quote, Verse,
-              Figure… <span className="ev-kbd">M3</span>
-            </div>
-          </div>
-        </div>
+        <textarea
+          className="ev-latex-input"
+          spellCheck={false}
+          readOnly
+          value={tex || "% Generated LaTeX appears here once the document compiles."}
+        />
       )}
     </div>
   );
