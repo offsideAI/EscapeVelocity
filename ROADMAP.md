@@ -14,7 +14,7 @@ App lives in [`EscapeVelocity-native-tauri/`](./EscapeVelocity-native-tauri/).
 | [Epic 2](#epic-2--m2-generation-contract-latexgen) | M2 | Generation contract (`latexgen`) | 🟢 |
 | [Epic 3](#epic-3--m3-structured-editor) | M3 | Structured editor | 🟢 |
 | [Epic 4](#epic-4--m4-latex-source-pane--synctex) | M4 | LaTeX source pane + SyncTeX | 🟢 |
-| [Epic 5](#epic-5--m5-pagesetting-inspector) | M5 | PageSetting inspector | ⬜ |
+| [Epic 5](#epic-5--m5-pagesetting-inspector) | M5 | PageSetting inspector | 🟢 |
 | [Epic 6](#epic-6--m6-export--kdp-preflight) | M6 | Export + KDP preflight · *checkpoint* | ⬜ |
 | [Epic 7](#epic-7--m7-import--templates) | M7 | Import + templates (Phase 2 start) | ⬜ |
 
@@ -151,16 +151,19 @@ Locked decisions (from the interview): Stack A (Tauri 2 + React + Vite + TS); li
 ---
 
 ## Epic 5 — M5: PageSetting inspector
-**DoD:** switching trim to 6×9 and changing body font visibly re-typesets the whole book. **Status: ⬜**
+**DoD:** switching trim to 6×9 and changing body font visibly re-typesets the whole book. **Status: 🟢** (DoD met; verified.)
 
 ### Story 5.1 — Inspector UI
-- ⬜ GUI controls bound to `settings.json` (trim/margins/gutter; font/size/leading/measure/justification/hyphenation/microtype; paragraph indent-vs-spaced + penalties; chapter style; running heads/folios; front/back + auto-ToC; output preset)
+- ✅ GUI controls bound to `settings.json` (`src/inspector/`), in a tabbed left dock (Structure ↔ Settings): output preset, trim readout, bleed; font, size, leading, justify, hyphenate, microtype; paragraph style + no-first-indent; inside/outside/top/bottom margins; running heads. Command **Open PageSetting Inspector** (⌘,)
+- ✅ **Fonts now work** — `fontspec` by OTF filename over the bundled fonts (EB Garamond default, + Libertinus / TeX Gyre Pagella / Latin Modern / Computer Modern); `latexgen` emits `\setmainfont[...]` with bold/italic variants
+- ⏸️ Chapter-style drop-cap/ornament controls, measure, front/back + auto-ToC → later
 
 ### Story 5.2 — Binding & recompile
-- ⬜ Each change → regenerate preamble → recompile; **KDP 6×9 preset**
-- ⬜ Gutter auto-suggest from page count (post-compile, data-driven table)
+- ✅ Each change → `setSettings` → regenerate preamble → debounced recompile; **KDP 6×9** default + preset switching (`switchPreset` → Rust `default_settings`)
+- ⏸️ Gutter auto-suggest from live page count (data-driven `kdp_gutter_in` exists; not yet wired to the compiled page count)
 
 ### Story 5.3 — Verify M5
+- ✅ Browser: inspector renders all sections; font/size/toggle changes drive `settings`. Rust: golden re-blessed with `fontspec`; `generated_sample_compiles` passes offline with EB Garamond. clippy clean; native app runs.
 
 ---
 

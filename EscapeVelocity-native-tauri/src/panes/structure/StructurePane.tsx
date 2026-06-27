@@ -36,35 +36,30 @@ function outline(body: Node[]): Row[] {
   return rows;
 }
 
-export function StructurePane() {
+/** Body-only outline; the pane chrome + tabs live in LeftDock. */
+export function StructureOutline() {
   const document = useCompile((s) => s.document);
   const rows = document ? outline(document.body) : [];
 
   return (
-    <div className="ev-pane">
-      <header className="ev-pane__header">
-        <span className="ev-pane__title">Structure</span>
-        <span className="ev-pane__header-spacer" />
-      </header>
-      <div className="ev-pane__body ev-outline">
-        {rows.length === 0 ? (
-          <div className="ev-empty">
-            <div className="ev-empty__title">No chapters yet</div>
-            <div className="ev-empty__hint">
-              Add a Chapter Title in the editor (<span className="ev-kbd">⌘⌥1</span>) and it
-              appears here.
-            </div>
+    <div className="ev-pane__body ev-outline">
+      {rows.length === 0 ? (
+        <div className="ev-empty">
+          <div className="ev-empty__title">No chapters yet</div>
+          <div className="ev-empty__hint">
+            Add a Chapter Title in the editor (<span className="ev-kbd">⌘⌥1</span>) and it appears
+            here.
           </div>
-        ) : (
-          <ul className="ev-outline__list">
-            {rows.map((r, i) => (
-              <li key={i} className={`ev-outline__row ev-outline__row--${r.kind}`} title={r.label}>
-                {r.label}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+        </div>
+      ) : (
+        <ul className="ev-outline__list">
+          {rows.map((r, i) => (
+            <li key={i} className={`ev-outline__row ev-outline__row--${r.kind}`} title={r.label}>
+              {r.label}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

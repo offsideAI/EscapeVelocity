@@ -6,7 +6,7 @@ import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import type { ReactNode } from "react";
 import { useWorkspace } from "./store";
 import { useCompile } from "../compile/store";
-import { StructurePane } from "../panes/structure/StructurePane";
+import { LeftDock } from "./LeftDock";
 import { EditorPane } from "../panes/editor/EditorPane";
 import { PreviewPane } from "../panes/preview/PreviewPane";
 
@@ -72,8 +72,8 @@ export function Workspace() {
   const children: ReactNode[] = [];
   if (structureVisible) {
     children.push(
-      <Panel key="structure" id="structure" order={1} defaultSize={20} minSize={12} maxSize={40}>
-        <StructurePane />
+      <Panel key="structure" id="structure" order={1} defaultSize={22} minSize={14} maxSize={42}>
+        <LeftDock />
       </Panel>,
     );
     children.push(<PanelResizeHandle key="rh-left" className="ev-resize" />);

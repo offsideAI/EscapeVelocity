@@ -8,11 +8,13 @@ import { useSyncExternalStore } from "react";
 import { applyTheme, getStoredTheme, type ThemeName } from "../theme/tokens";
 
 export type EditorView = "structured" | "latex";
+export type LeftTab = "structure" | "settings";
 
 export interface WorkspaceState {
   structureVisible: boolean;
   previewVisible: boolean;
   editorView: EditorView;
+  leftTab: LeftTab;
   theme: ThemeName;
   paletteOpen: boolean;
 }
@@ -21,6 +23,7 @@ let state: WorkspaceState = {
   structureVisible: true,
   previewVisible: true,
   editorView: "structured",
+  leftTab: "structure",
   theme: getStoredTheme(),
   paletteOpen: false,
 };
@@ -42,6 +45,8 @@ export const workspace = {
   },
   toggleStructure: () => set({ structureVisible: !state.structureVisible }),
   togglePreview: () => set({ previewVisible: !state.previewVisible }),
+  setLeftTab: (leftTab: LeftTab) => set({ leftTab }),
+  openInspector: () => set({ leftTab: "settings", structureVisible: true }),
   setEditorView: (editorView: EditorView) => set({ editorView }),
   toggleEditorView: () =>
     set({ editorView: state.editorView === "structured" ? "latex" : "structured" }),

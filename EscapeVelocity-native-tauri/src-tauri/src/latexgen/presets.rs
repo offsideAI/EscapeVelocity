@@ -26,6 +26,55 @@ pub fn find(id: &str) -> Option<&'static Preset> {
     PRESETS.iter().find(|p| p.id == id)
 }
 
+/// A body font. Referenced by OTF filename (named lookup doesn't work under
+/// Tectonic), all shipped inside Tectonic's bundle so they work offline. `spec:
+/// None` means the `memoir`/XeTeX default (Computer Modern), no `fontspec`.
+pub struct Font {
+    pub id: &'static str,
+    pub label: &'static str,
+    pub spec: Option<FontFiles>,
+}
+
+pub struct FontFiles {
+    pub main: &'static str,
+    pub bold: &'static str,
+    pub italic: &'static str,
+    pub bold_italic: &'static str,
+}
+
+const fn files(main: &'static str, bold: &'static str, italic: &'static str, bi: &'static str) -> Option<FontFiles> {
+    Some(FontFiles { main, bold, italic, bold_italic: bi })
+}
+
+/// Curated, open-licensed body fonts (all present in Tectonic's bundle).
+pub const FONTS: &[Font] = &[
+    Font {
+        id: "ebgaramond",
+        label: "EB Garamond",
+        spec: files("EBGaramond-Regular.otf", "EBGaramond-Bold.otf", "EBGaramond-Italic.otf", "EBGaramond-BoldItalic.otf"),
+    },
+    Font {
+        id: "libertinus",
+        label: "Libertinus Serif",
+        spec: files("LibertinusSerif-Regular.otf", "LibertinusSerif-Bold.otf", "LibertinusSerif-Italic.otf", "LibertinusSerif-BoldItalic.otf"),
+    },
+    Font {
+        id: "pagella",
+        label: "TeX Gyre Pagella",
+        spec: files("texgyrepagella-regular.otf", "texgyrepagella-bold.otf", "texgyrepagella-italic.otf", "texgyrepagella-bolditalic.otf"),
+    },
+    Font {
+        id: "lmroman",
+        label: "Latin Modern Roman",
+        spec: files("lmroman10-regular.otf", "lmroman10-bold.otf", "lmroman10-italic.otf", "lmroman10-bolditalic.otf"),
+    },
+    Font { id: "cm", label: "Computer Modern", spec: None },
+];
+
+pub fn font(id: &str) -> Option<&'static Font> {
+    FONTS.iter().find(|f| f.id == id)
+}
+
 /// KDP's minimum inside (gutter) margin by page count, in inches. The inside
 /// margin must grow with thickness so text isn't lost in the spine.
 /// Source: KDP paperback manuscript guidelines.
@@ -57,7 +106,7 @@ pub fn default_settings(preset_id: &str) -> Option<Settings> {
             bottom_in: 0.9,
         },
         body: Body {
-            font: "Latin Modern Roman".to_string(),
+            font: "ebgaramond".to_string(),
             size_pt: 11.0,
             leading_pt: 14.5,
             justify: true,

@@ -1,11 +1,10 @@
 //! Pre-warm a Tectonic cache with **exactly the LaTeX the generator emits**, so
 //! the shipped app compiles fully offline (cache-only mode, zero network).
 //!
-//! It runs the real `latexgen` over the sample document at each body size the
-//! inspector exposes — guaranteeing the cache covers the generator's package /
-//! feature / font-metric footprint. As M5 adds `fontspec` + bundled fonts and
-//! more chapter styles, this stays correct automatically (it compiles generator
-//! output), only needing new sizes/presets added below.
+//! It runs the real `latexgen` over the sample document for every curated body
+//! font (each pulls its OTF + the `fontspec` machinery) and across the body
+//! sizes the inspector exposes — guaranteeing the offline cache covers the
+//! generator's footprint. Extend the loops below as M5+ add fonts/sizes.
 //!
 //! Populate the bundled cache (needs network once):
 //! ```sh
@@ -13,7 +12,11 @@
 //! ```
 
 use escapevelocity_native_tauri_lib::compile::latex_to_pdf_fetching;
-use escapevelocity_native_tauri_lib::latexgen::{generate, model::Document, presets::default_settings};
+use escapevelocity_native_tauri_lib::latexgen::{
+    generate,
+    model::Document,
+    presets::{default_settings, FONTS},
+};
 
 const SAMPLE: &str = include_str!("../../src/fixtures/sample.document.json");
 
@@ -23,12 +26,8 @@ fn main() {
 
     let doc: Document = serde_json::from_str(SAMPLE).expect("sample.document.json parses");
 
-    for size in [10.0_f64, 11.0, 12.0] {
-        let mut settings = default_settings("kdp_6x9").expect("preset exists");
-        settings.body.size_pt = size;
-        let tex = generate(&doc, &settings);
-
-        eprint!("  compiling generator output @ {size}pt … ");
+    let warm = |label: String, tex: String| {
+        eprint!("  {label} … ");
         match latex_to_pdf_fetching(&tex) {
             Ok(pdf) => eprintln!("ok ({} bytes)", pdf.len()),
             Err(e) => {
@@ -36,6 +35,21 @@ fn main() {
                 std::process::exit(1);
             }
         }
+    };
+
+    // Every curated font at the default size.
+    for font in FONTS {
+        let mut settings = default_settings("kdp_6x9").expect("preset exists");
+        settings.body.font = font.id.to_string();
+        warm(format!("font {}", font.id), generate(&doc, &settings));
     }
+
+    // The default font across the other body sizes.
+    for size in [10.0_f64, 12.0] {
+        let mut settings = default_settings("kdp_6x9").expect("preset exists");
+        settings.body.size_pt = size;
+        warm(format!("size {size}pt"), generate(&doc, &settings));
+    }
+
     eprintln!("prewarm complete.");
 }
