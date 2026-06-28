@@ -6,7 +6,7 @@
  *  superseded by newer ones. (The visual block editor replaces the JSON view in
  *  M3; the LaTeX view becomes CodeMirror with editable Raw-LaTeX in M4.) */
 import { useSyncExternalStore } from "react";
-import { compileLatex, generateLatex, getDefaultSettings, isTauri } from "./api";
+import { compileLatex, fetchTemplate, generateLatex, getDefaultSettings, isTauri } from "./api";
 import type { Document, Settings } from "../model/types";
 import sampleDocument from "../fixtures/sample.document.json";
 
@@ -17,6 +17,8 @@ export interface AppState {
   docJson: string;
   document: Document | null;
   docError: string | null;
+  /** Bumped only on external document replacement (import), so the editor reloads. */
+  docVersion: number;
   settings: Settings | null;
   /** Generated LaTeX, shown read-only in the LaTeX view. */
   tex: string;
@@ -57,6 +59,7 @@ let state: AppState = {
   docJson: JSON.stringify(sampleDocument, null, 2),
   document: sampleDocument as Document,
   docError: null,
+  docVersion: 0,
   settings: DEFAULT_SETTINGS,
   tex: "",
   status: "idle",
@@ -137,6 +140,19 @@ export const compileStore = {
     debounceTimer = setTimeout(() => void compileStore.build(), DEBOUNCE_MS);
   },
 
+  /** Replace the whole document (from import) — bumps docVersion so the editor
+   *  reloads its content — and rebuild. */
+  replaceDocument(doc: Document): void {
+    set({
+      document: doc,
+      docJson: JSON.stringify(doc, null, 2),
+      docError: null,
+      docVersion: state.docVersion + 1,
+    });
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => void compileStore.build(), DEBOUNCE_MS);
+  },
+
   /** Replace the PageSetting settings (from the inspector) and rebuild. */
   setSettings(settings: Settings): void {
     set({ settings });
@@ -149,6 +165,17 @@ export const compileStore = {
     if (!isTauri()) return;
     try {
       const settings = await getDefaultSettings(preset);
+      compileStore.setSettings(settings);
+    } catch (e) {
+      set({ status: "error", error: String(e) });
+    }
+  },
+
+  /** Apply a house-style template (a complete settings starting point). */
+  async applyTemplate(template: string): Promise<void> {
+    if (!isTauri() || !template) return;
+    try {
+      const settings = await fetchTemplate(template);
       compileStore.setSettings(settings);
     } catch (e) {
       set({ status: "error", error: String(e) });

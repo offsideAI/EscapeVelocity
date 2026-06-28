@@ -5,6 +5,15 @@ export const PRESETS = [
   { id: "kdp_5x8", label: "KDP Paperback 5 × 8 in" },
   { id: "kdp_5.5x8.5", label: "KDP Paperback 5.5 × 8.5 in" },
   { id: "kdp_8.5x11", label: "KDP 8.5 × 11 in" },
+  { id: "ingramspark_5.5x8.5", label: "IngramSpark 5.5 × 8.5 in" },
+  { id: "ingramspark_6x9", label: "IngramSpark 6 × 9 in" },
+] as const;
+
+export const TEMPLATES = [
+  { id: "", label: "Start from a template…" },
+  { id: "literary_5x8", label: "Literary Fiction · 5 × 8" },
+  { id: "nonfiction_6x9", label: "Nonfiction · 6 × 9" },
+  { id: "memoir_5.5x8.5", label: "Memoir · 5.5 × 8.5" },
 ] as const;
 
 export const FONTS = [
