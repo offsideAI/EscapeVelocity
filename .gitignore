@@ -1,1 +1,71 @@
+# Root .gitignore for the EscapeVelocity repo.
+# Tool-specific ignores also live in:
+#   EscapeVelocity-native-tauri/.gitignore           (Node: node_modules, dist, logs)
+#   EscapeVelocity-native-tauri/src-tauri/.gitignore (Rust/Tauri: target, gen, Tectonic cache)
+# The patterns below are repo-wide (no leading slash → match at any depth).
+
+# ── OS ──────────────────────────────────────────────────────────
 .DS_Store
+.DS_Store?
+._*
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+Icon?
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ── Editors / IDEs ──────────────────────────────────────────────
+.idea/
+*.iml
+*.swp
+*.swo
+*~
+*.sublime-workspace
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
+
+# ── Environment / secrets ───────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.local
+*.pem
+
+# ── Logs ────────────────────────────────────────────────────────
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ── JavaScript / Node (any package in the repo) ─────────────────
+node_modules/
+dist/
+dist-ssr/
+.vite/
+coverage/
+*.tsbuildinfo
+
+# ── Rust / Cargo (any crate in the repo) ────────────────────────
+target/
+**/*.rs.bk
+
+# ── Tauri generated ─────────────────────────────────────────────
+**/src-tauri/gen/
+
+# ── Tectonic offline cache (large, regenerated via `npm run prewarm`) ──
+# Keep the directory (its .gitkeep) so tauri-build's resource path exists;
+# ignore only the generated contents.
+**/vendor/tectonic-cache/*
+!**/vendor/tectonic-cache/.gitkeep
+
+# ── Misc / scratch ──────────────────────────────────────────────
+*.tmp
+.cache/
