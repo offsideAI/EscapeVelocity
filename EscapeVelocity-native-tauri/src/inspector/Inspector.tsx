@@ -4,7 +4,7 @@
 import type { ReactNode } from "react";
 import { compileStore, useCompile } from "../compile/store";
 import type { ParagraphStyle, Settings } from "../model/types";
-import { FONTS, PARAGRAPH_STYLES, PRESETS } from "./options";
+import { FONTS, PARAGRAPH_STYLES, PRESETS, TEMPLATES } from "./options";
 
 function patchSettings(mut: (s: Settings) => Settings) {
   const s = compileStore.getState().settings;
@@ -112,6 +112,14 @@ export function Inspector() {
   return (
     <div className="ev-pane__body ev-inspector">
       <Section title="Output">
+        <SelectRow
+          label="Template"
+          value=""
+          options={TEMPLATES}
+          onChange={(v) => {
+            if (v) void compileStore.applyTemplate(v);
+          }}
+        />
         <SelectRow
           label="Preset"
           value={settings.output_preset}

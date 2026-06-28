@@ -132,6 +132,18 @@ fn export_tex(
     std::fs::write(&path, tex).map_err(|e| format!("failed to write {path}: {e}"))
 }
 
+/// Full PageSetting for a house-style template (`literary_5x8`, …).
+#[tauri::command]
+fn apply_template(template: String) -> Result<latexgen::model::Settings, String> {
+    latexgen::presets::template(&template).ok_or_else(|| format!("unknown template: {template}"))
+}
+
+/// Read a UTF-8 text file (for Markdown import).
+#[tauri::command]
+fn read_text_file(path: String) -> Result<String, String> {
+    std::fs::read_to_string(&path).map_err(|e| format!("failed to read {path}: {e}"))
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -146,7 +158,9 @@ pub fn run() {
             synctex_forward,
             preflight,
             export_pdf,
-            export_tex
+            export_tex,
+            apply_template,
+            read_text_file
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

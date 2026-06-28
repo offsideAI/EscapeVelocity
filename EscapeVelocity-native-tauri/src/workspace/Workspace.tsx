@@ -17,6 +17,9 @@ function TitleBar() {
         EscapeVelocity
       </span>
       <span className="ev-titlebar__spacer" data-tauri-drag-region />
+      <button type="button" className="ev-titlebar__btn" onClick={() => workspace.openImport()}>
+        Import
+      </button>
       <button type="button" className="ev-titlebar__btn" onClick={() => workspace.openExport()}>
         Export
       </button>

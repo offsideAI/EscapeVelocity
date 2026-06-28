@@ -16,7 +16,7 @@ App lives in [`EscapeVelocity-native-tauri/`](./EscapeVelocity-native-tauri/).
 | [Epic 4](#epic-4--m4-latex-source-pane--synctex) | M4 | LaTeX source pane + SyncTeX | 🟢 |
 | [Epic 5](#epic-5--m5-pagesetting-inspector) | M5 | PageSetting inspector | 🟢 |
 | [Epic 6](#epic-6--m6-export--kdp-preflight) | M6 | Export + KDP preflight · *checkpoint* | 🟢 |
-| [Epic 7](#epic-7--m7-import--templates) | M7 | Import + templates (Phase 2 start) | ⬜ |
+| [Epic 7](#epic-7--m7-import--templates) | M7 | Import + templates (Phase 2 start) | 🟢 |
 
 Locked decisions (from the interview): Stack A (Tauri 2 + React + Vite + TS); licensing **deferred** → clean-room Zed aesthetic, no vendored Zed source; block editor = TipTap/ProseMirror custom schema; LaTeX = embedded `tectonic` crate, pre-bundled for offline; flowing-text books only (v1); `latexgen` emits a node-id ↔ `.tex` source map; generated `.tex` read-only, Raw-LaTeX editable/verbatim; all trim/bleed/margin geometry in one data-driven presets file; Rust = rust-analyzer LSP live + clippy/tests at each gate.
 
@@ -188,25 +188,27 @@ Locked decisions (from the interview): Stack A (Tauri 2 + React + Vite + TS); li
 ---
 
 ## Epic 7 — M7: Import + templates
-**DoD (Phase 2 start):** import a manuscript with a review step; full presets; templates; scaffolding. **Status: ⬜**
+**DoD (Phase 2 start):** import a manuscript with a review step; full presets; templates; scaffolding. **Status: 🟢** (import + presets + templates done; some Phase-2 items deferred.)
 
 ### Story 7.1 — Import
-- ⬜ Markdown import (standard parser)
-- ⬜ DOCX import (mammoth or a Rust docx reader) with an **import-review** step (no silent guessing)
+- ✅ Markdown import (`src/import/markdown.ts`, marked) with a **review step** (`ImportDialog`, ⌘⇧I / title-bar): paste or open a `.md` file → structure summary → replace (editor reloads via `docVersion`). `# `→chapter, `##`/`###`→heading, block quotes, `---`→scene break, **bold**/*italic*/links/code
+- ⏸️ DOCX import (mammoth) with style-mapping review → later
 
 ### Story 7.2 — Presets
-- ⬜ Full KDP trim-size set + IngramSpark (data-driven)
+- ✅ Full KDP set + IngramSpark (data-driven in `presets.rs`)
 
 ### Story 7.3 — Templates
-- ⬜ House-style save/share (PageSetting + styles) + a small starter library
+- ✅ House-style starter library (Literary 5×8, Nonfiction 6×9, Memoir 5.5×8.5) applied from the inspector (`apply_template`)
+- ⏸️ Save/share custom templates → later
 
 ### Story 7.4 — Front/back-matter
-- ⬜ Standard front/back-matter scaffolding + auto-ToC
+- ⏸️ Standard front/back-matter scaffolding + auto-ToC → later (Phase 2)
 
 ### Story 7.5 — Fonts
-- ⬜ Ship open-licensed defaults (EB Garamond / Libertinus / Source Serif)
+- ✅ Open-licensed fonts shipped (EB Garamond / Libertinus / TeX Gyre Pagella / Latin Modern — from the Tectonic bundle, M5)
 
 ### Story 7.6 — Verify
+- ✅ Markdown import verified end-to-end (parse → review → editor reload → outline + marks); native launch clean
 
 ---
 

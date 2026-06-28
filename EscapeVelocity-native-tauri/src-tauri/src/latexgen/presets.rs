@@ -20,7 +20,52 @@ pub const PRESETS: &[Preset] = &[
     Preset { id: "kdp_5x8", label: "KDP Paperback 5 × 8 in", trim_w_in: 5.0, trim_h_in: 8.0 },
     Preset { id: "kdp_5.5x8.5", label: "KDP Paperback 5.5 × 8.5 in", trim_w_in: 5.5, trim_h_in: 8.5 },
     Preset { id: "kdp_8.5x11", label: "KDP 8.5 × 11 in", trim_w_in: 8.5, trim_h_in: 11.0 },
+    Preset { id: "ingramspark_5.5x8.5", label: "IngramSpark 5.5 × 8.5 in", trim_w_in: 5.5, trim_h_in: 8.5 },
+    Preset { id: "ingramspark_6x9", label: "IngramSpark 6 × 9 in", trim_w_in: 6.0, trim_h_in: 9.0 },
 ];
+
+/// A house-style template: a complete `Settings` starting point (trim + font +
+/// type + margins). The inspector lets the author tweak from there.
+pub struct Template {
+    pub id: &'static str,
+    pub label: &'static str,
+}
+
+pub const TEMPLATES: &[Template] = &[
+    Template { id: "literary_5x8", label: "Literary Fiction · 5 × 8" },
+    Template { id: "nonfiction_6x9", label: "Nonfiction · 6 × 9" },
+    Template { id: "memoir_5.5x8.5", label: "Memoir · 5.5 × 8.5" },
+];
+
+/// Build the full `Settings` for a house-style template.
+pub fn template(id: &str) -> Option<Settings> {
+    let mut s = match id {
+        "literary_5x8" => {
+            let mut s = default_settings("kdp_5x8")?;
+            s.body.font = "ebgaramond".into();
+            s.body.size_pt = 11.0;
+            s.body.leading_pt = 14.0;
+            s
+        }
+        "nonfiction_6x9" => {
+            let mut s = default_settings("kdp_6x9")?;
+            s.body.font = "libertinus".into();
+            s.body.size_pt = 11.0;
+            s.body.leading_pt = 15.0;
+            s
+        }
+        "memoir_5.5x8.5" => {
+            let mut s = default_settings("kdp_5.5x8.5")?;
+            s.body.font = "pagella".into();
+            s.body.size_pt = 11.5;
+            s.body.leading_pt = 15.0;
+            s
+        }
+        _ => return None,
+    };
+    s.running_heads.enabled = true;
+    Some(s)
+}
 
 pub fn find(id: &str) -> Option<&'static Preset> {
     PRESETS.iter().find(|p| p.id == id)

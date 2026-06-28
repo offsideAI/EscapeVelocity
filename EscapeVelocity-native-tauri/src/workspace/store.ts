@@ -18,6 +18,7 @@ export interface WorkspaceState {
   theme: ThemeName;
   paletteOpen: boolean;
   exportOpen: boolean;
+  importOpen: boolean;
 }
 
 let state: WorkspaceState = {
@@ -28,6 +29,7 @@ let state: WorkspaceState = {
   theme: getStoredTheme(),
   paletteOpen: false,
   exportOpen: false,
+  importOpen: false,
 };
 
 const listeners = new Set<() => void>();
@@ -62,6 +64,8 @@ export const workspace = {
   togglePalette: () => set({ paletteOpen: !state.paletteOpen }),
   openExport: () => set({ exportOpen: true }),
   closeExport: () => set({ exportOpen: false }),
+  openImport: () => set({ importOpen: true }),
+  closeImport: () => set({ importOpen: false }),
 };
 
 /** Subscribe to a slice of workspace state. Selectors must return primitives

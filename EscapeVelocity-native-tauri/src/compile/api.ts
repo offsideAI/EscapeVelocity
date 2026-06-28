@@ -1,6 +1,6 @@
 /** Bridge to the Rust compile / generation / export commands. */
 import { invoke } from "@tauri-apps/api/core";
-import { save } from "@tauri-apps/plugin-dialog";
+import { open, save } from "@tauri-apps/plugin-dialog";
 import type { Document, Settings } from "../model/types";
 
 export interface PreflightCheck {
@@ -27,6 +27,11 @@ export async function getDefaultSettings(preset: string): Promise<Settings> {
 /** Generate clean memoir LaTeX from a document + settings (deterministic, pure). */
 export async function generateLatex(document: Document, settings: Settings): Promise<string> {
   return await invoke<string>("generate_latex", { document, settings });
+}
+
+/** Full settings for a house-style template. */
+export async function fetchTemplate(template: string): Promise<Settings> {
+  return await invoke<Settings>("apply_template", { template });
 }
 
 /** SyncTeX: preview click (page, vertical fraction) → generated-source line. */
@@ -69,6 +74,17 @@ export async function chooseSavePath(
   label: string,
 ): Promise<string | null> {
   return await save({ defaultPath: defaultName, filters: [{ name: label, extensions: [ext] }] });
+}
+
+/** Open-file dialog for a Markdown manuscript → its text (or null if cancelled). */
+export async function openMarkdownFile(): Promise<string | null> {
+  if (!isTauri()) return null;
+  const path = await open({
+    multiple: false,
+    filters: [{ name: "Markdown", extensions: ["md", "markdown", "txt"] }],
+  });
+  if (typeof path !== "string") return null;
+  return await invoke<string>("read_text_file", { path });
 }
 
 /** Compile a complete LaTeX document to PDF bytes via the embedded Tectonic

@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Workspace } from "./workspace/Workspace";
 import { CommandPalette } from "./command-palette/CommandPalette";
 import { ExportDialog } from "./export/ExportDialog";
+import { ImportDialog } from "./import/ImportDialog";
 import { registerCommands } from "./commands/registry";
 import { installKeymap, type KeyBinding } from "./commands/keymap";
 import { workspace } from "./workspace/store";
@@ -67,6 +68,13 @@ function registerDefaultCommands() {
       keybinding: "⌘E",
       run: workspace.openExport,
     },
+    {
+      id: "import.open",
+      category: "File",
+      title: "Import Manuscript…",
+      keybinding: "⌘⇧I",
+      run: workspace.openImport,
+    },
   ]);
 }
 
@@ -80,6 +88,7 @@ const KEYMAP: KeyBinding[] = [
   { key: "mod-enter", command: "compile.run" },
   { key: "mod-,", command: "inspector.open" },
   { key: "mod-e", command: "export.open" },
+  { key: "mod-shift-i", command: "import.open" },
 ];
 
 let commandsRegistered = false;
@@ -102,6 +111,7 @@ function App() {
       <Workspace />
       <CommandPalette />
       <ExportDialog />
+      <ImportDialog />
     </>
   );
 }
