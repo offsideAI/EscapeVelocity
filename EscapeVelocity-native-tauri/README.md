@@ -62,12 +62,19 @@ src-tauri/
     export/         print-ready PDF + KDP preflight        (M6)
 ```
 
-## Milestones
-- [x] **M0** — Tauri+React shell: dark Zed-token theme, three collapsible panes, command-palette stub.
-- [ ] **M1** — Embed Tectonic; compile a hardcoded `memoir` doc → PDF.js preview. *(checkpoint)*
-- [ ] **M2** — `document.json` / `settings.json` types + pure `latexgen` with golden tests.
-- [ ] **M3** — Structured block editor + core style palette.
-- [ ] **M4** — CodeMirror LaTeX pane + SyncTeX + lossless Raw-LaTeX.
-- [ ] **M5** — PageSetting inspector (KDP 6×9).
-- [ ] **M6** — Export + KDP preflight. *(checkpoint)*
-- [ ] **M7** — Import (Markdown/DOCX) + templates.
+## Milestones (v1 complete — see [`../ROADMAP.md`](../ROADMAP.md) for detail)
+- [x] **M0** — Tauri+React shell: dark Zed-token theme, three collapsible panes, command palette.
+- [x] **M1** — Embedded Tectonic → PDF.js preview (M1.5: fully offline, cache-only).
+- [x] **M2** — `document.json` / `settings.json` types + pure `latexgen` with golden tests.
+- [x] **M3** — Structured block editor (TipTap) + style palette + slash menu.
+- [x] **M4** — CodeMirror LaTeX pane + SyncTeX click-to-jump; Raw-LaTeX round-trips.
+- [x] **M5** — PageSetting inspector + working fonts (fontspec).
+- [x] **M6** — Print-ready PDF export + KDP preflight.
+- [x] **M7** — Markdown import (review step) + presets + house-style templates.
+
+**Before `tauri build`:** run `npm run prewarm` once to populate the offline Tectonic cache
+(`src-tauri/vendor/tectonic-cache`, gitignored). macOS needs the native deps:
+`brew install harfbuzz graphite2 freetype libpng fontconfig icu4c`.
+
+**Deferred (Phase 2):** DOCX import; front/back-matter scaffolding + auto-ToC; bleed
+end-to-end + image/asset handling; plain-language TeX diagnostics; save/share templates.
